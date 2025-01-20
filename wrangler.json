@@ -1,0 +1,16 @@
+{
+    "name": "aboutme",
+    "main": "src/index.js",
+    "compatibility_date": "2024-01-20",
+    "workers_dev": true,
+    "routes": [
+        {
+            "pattern": "aboutme.robords.com/*",
+            "custom_domain": true
+        },
+        {
+            "pattern": "aboutme.datainthewild.com/*",
+            "custom_domain": true
+        }
+    ]
+}
