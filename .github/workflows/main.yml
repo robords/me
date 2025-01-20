@@ -8,17 +8,27 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy
+    name: Deploy to Cloudflare Worker
     steps:
+      # Checkout the code
       - uses: actions/checkout@v4
 
+      # Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      # Add this step to authenticate with Cloudflare
+      # Ensure wrangler is available
+      - name: Install Wrangler CLI
+        run: npm install -g wrangler
+
+      # Authenticate with Cloudflare and publish worker
       - name: Publish to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      # Debug step to ensure Wrangler works
+      - name: Debug Wrangler
+        run: wrangler --version
