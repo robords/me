@@ -5,11 +5,11 @@
     "workers_dev": true,
     "routes": [
         {
-            "pattern": "aboutme.robords.com/*",
+            "pattern": "aboutme.robords.com/",
             "custom_domain": true
         },
         {
-            "pattern": "aboutme.datainthewild.com/*",
+            "pattern": "aboutme.datainthewild.com/",
             "custom_domain": true
         }
     ]
