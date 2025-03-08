@@ -26,8 +26,6 @@ jobs:
       # Publish to Cloudflare Worker (Pass the API token as environment variable)
       - name: Publish aboutme Worker
         run: wrangler publish --config wrangler.json
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
