@@ -6,7 +6,7 @@
     "build": {
       "command": "npm install && npm run build",
       "external_modules": ["marked"]
-    }
+    },
     "routes": [
       {
         "pattern": "flippedbits.datainthewild.com",
