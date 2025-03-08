@@ -3,10 +3,6 @@
     "compatibility_date": "2024-01-20",
     "workers_dev": true,
     "main": "src/flippedbits.ts",
-    "build": {
-      "command": "npm install && npm run build",
-      "external_modules": ["marked"]
-    },
     "routes": [
       {
         "pattern": "flippedbits.datainthewild.com",

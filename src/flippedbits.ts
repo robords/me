@@ -1,8 +1,6 @@
-import { marked } from "marked";
-
 export default {
   async fetch(request: Request): Promise<Response> {
-    // Serve the HTML page for the main content
+    // Serve the HTML page for the main content (the directory page)
     if (request.url.endsWith("/")) {
       const htmlContent = await getPageHtml();
       return new Response(htmlContent, {
@@ -10,7 +8,7 @@ export default {
       });
     }
 
-    // Handle loading poems dynamically from GitHub
+    // Handle loading poems dynamically
     const poemName = request.url.split("/").pop();
     if (poemName && poemName !== "index.html") {
       const poemContent = await getPoemContent(poemName);
@@ -28,7 +26,7 @@ async function getPageHtml(): Promise<string> {
   const poemFiles = await getPoemFiles();
   let linksHtml = poemFiles
     .map(
-      (filename) => `<li><a href="/${filename}">${filename.replace(".md", "")}</a></li>`
+      (filename) => `<li><a href="/${filename}">${filename.replace(".html", "")}</a></li>`
     )
     .join("");
 
@@ -54,28 +52,28 @@ async function getPageHtml(): Promise<string> {
   `;
 }
 
-// Fetch list of poems (get from GitHub's repository)
+// Function to fetch list of poems in the poems directory
 async function getPoemFiles(): Promise<string[]> {
-  // List of files you want to retrieve from GitHub
-  // Here, you can hardcode filenames or dynamically fetch file list via GitHub API
-  return ["test1.md", "test2.md"]; // Example files, adjust based on actual files
+  // Simulate fetching poem filenames from "poems" directory (adjust this for your real setup)
+  return ["poem1.html", "poem2.html"];
 }
 
-// Fetch the content of a specific poem from GitHub and convert it from Markdown to HTML
+// Function to fetch the content of a specific poem and return HTML content
 async function getPoemContent(poemName: string): Promise<string> {
-  const githubRawUrl = `https://raw.githubusercontent.com/robords/me/main/src/content/${poemName}`;
+  const poemUrl = `https://raw.githubusercontent.com/robords/me/main/src/content/${poemName}`;
 
   try {
-    const response = await fetch(githubRawUrl);
+    const response = await fetch(poemUrl);
 
     if (!response.ok) {
       return "Poem not found.";
     }
 
-    const markdownContent = await response.text();
-    const htmlContent = marked(markdownContent); // Convert Markdown to HTML
+    // Fetch the content of the poem (which is now HTML)
+    const htmlContent = await response.text();
     return htmlContent;
   } catch (error) {
     return "Failed to fetch poem.";
   }
 }
+
