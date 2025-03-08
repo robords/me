@@ -2,7 +2,7 @@
     "name": "flippedbits",
     "compatibility_date": "2024-01-20",
     "workers_dev": true,
-    "main": "src/flippedbits.js",
+    "main": "src/flippedbits.ts",
     "routes": [
       {
         "pattern": "flippedbits.datainthewild.com",
