@@ -1,0 +1,13 @@
+{
+    "name": "flippedbits",
+    "compatibility_date": "2024-01-20",
+    "workers_dev": true,
+    "main": "src/flippedbits.js",
+    "routes": [
+      {
+        "pattern": "flippedbits.datainthewild.com",
+        "custom_domain": true
+      }
+    ],
+    "account_id": "5eb48ee94d0e68303e7e386653a1f6cf"
+  }

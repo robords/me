@@ -24,13 +24,37 @@ jobs:
         run: npm install -g wrangler
 
       # Publish to Cloudflare Worker (Pass the API token as environment variable)
-      - name: Publish to Cloudflare
+      - name: Publish aboutme Worker
         uses: cloudflare/wrangler-action@v3
+        run: wrangler publish --config wrangler.json
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       # Debug step to ensure Wrangler works
+      - name: Debug Wrangler
+        run: wrangler --version
+
+  deploy-flippedbits:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Worker (flippedbits)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Wrangler CLI
+        run: npm install -g wrangler
+
+      - name: Publish flippedbits Worker
+        uses: cloudflare/wrangler-action@v3
+        run: wrangler publish --config wrangler-flippedbits.json
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
       - name: Debug Wrangler
         run: wrangler --version
