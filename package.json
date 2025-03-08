@@ -21,5 +21,8 @@
   "homepage": "https://github.com/robords/me#readme",
   "devDependencies": {
     "wrangler": "^3.103.2"
+  },
+  "dependencies": {
+    "marked": "^15.0.7"
   }
 }
