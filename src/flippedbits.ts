@@ -22,6 +22,7 @@ export default {
 // Function to generate the full HTML page with navbar & sidebar
 async function getPageHtml(): Promise<string> {
   const sidebarHtml = await getSidebar(); // Get sidebar with poem links
+  const poemsHtml = await getAllPoemsHtml(); // Fetch and display all poems
 
   return `
   <!DOCTYPE html>
@@ -37,9 +38,8 @@ async function getPageHtml(): Promise<string> {
     ${sidebarHtml} <!-- Include Sidebar -->
 
     <main class="pt-24 text-center">
-        <h1 class="text-4xl font-bold">Hello</h1>
-        <p class="mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-        <h2>Stuff</h2>
+        <h1 class="text-4xl font-bold">Hi</h1>
+        ${poemsHtml} <!-- All poems included here -->
     </main>
 
     <script>
@@ -74,11 +74,33 @@ async function getPoemContent(poemName: string): Promise<string> {
     const response = await fetch(poemUrl);
     if (!response.ok) return "Poem not found.";
     const htmlContent = await response.text();
-    return `${getNavbar()}${getSidebar()}<main class="pt-24">${htmlContent}</main>`; 
+    console.log(htmlContent);  // Debug the fetched content
+    return htmlContent;
   } catch (error) {
+    console.error("Error fetching poem:", error);  // Debug error
     return "Failed to fetch poem.";
   }
 }
+
+async function getAllPoemsHtml(): Promise<string> {
+  const poemFiles = await getPoemFiles();
+
+  let poemsHtmlArray = await Promise.all(
+    poemFiles.map(async (filename) => {
+      const poemContent = await getPoemContent(filename);
+      const poemId = filename.replace(".html", ""); // Unique ID for scrolling
+
+      return `
+      <section id="${poemId}" class="poem-container bg-white shadow-lg rounded-lg p-6 mt-8 mx-auto max-w-3xl">
+        <h2 class="text-2xl font-semibold mb-4">${poemId}</h2>
+        ${poemContent}
+      </section>`;
+    })
+  );
+
+  return poemsHtmlArray.join(""); // Combine all sections into one HTML string
+}
+
 
 // Function to return the Navbar HTML
 function getNavbar(): string {
@@ -109,20 +131,17 @@ async function getSidebar(): Promise<string> {
   let linksHtml = poemFiles
     .map(
       (filename) =>
-        `<a href="/${filename}" class="block text-[#f9f8fd] hover:text-[#7dce94]">${filename.replace(
-          ".html",
-          ""
-        )}</a>`
+        `<a href="#${filename.replace(".html", "")}" class="block text-[#f9f8fd] hover:text-[#7dce94]">
+          ${filename.replace(".html", "")}
+        </a>`
     )
     .join("");
 
-    return `
-    <!-- Sidebar Toggle Button -->
+  return `
     <button id="openMenu" class="fixed top-5 left-5 bg-[#3d3d3f] text-[#f9f8fd] p-3 rounded-full focus:outline-none z-[60]">
         ☰
     </button>
   
-    <!-- Sidebar Container -->
     <div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-[#3d3d3f] shadow-lg transform -translate-x-full transition-transform duration-300 z-[70]">
         <div class="p-5 flex justify-between items-center">
             <div class="bg-[#7dce94] w-6 h-6 rounded-full"></div>
@@ -131,6 +150,7 @@ async function getSidebar(): Promise<string> {
         <nav class="mt-10 space-y-6 text-center text-lg">
             ${linksHtml}
         </nav>
-    </div>`;
-  }
+    </div>
+  `;
+}
 
