@@ -66,7 +66,7 @@ async function getPageHtml(request: Request, env: any): Promise<string> {
 
 // Function to fetch list of poem files
 async function getPoemFiles(): Promise<string[]> {
-  return ["mall.html", "poem2.html"];
+  return ["mall.html", "george.html"];
 }
 
 // Function to fetch the poem content
