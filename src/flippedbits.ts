@@ -1,7 +1,10 @@
 export default {
-  async fetch(request: Request): Promise<Response> {
+  async fetch(request: Request, env: any): Promise<Response> {
+      // Log the env object to see what's available (for debugging)
+    console.log("Environment bindings:", Object.keys(env));
+
     if (request.url.endsWith("/")) {
-      const htmlContent = await getPageHtml();
+      const htmlContent = await getPageHtml(request, env);
       return new Response(htmlContent, {
         headers: { "content-type": "text/html; charset=utf-8" },
       });
@@ -9,7 +12,7 @@ export default {
 
     const poemName = request.url.split("/").pop();
     if (poemName && poemName !== "index.html") {
-      const poemContent = await getPoemContent(poemName);
+      const poemContent = await getPoemContent(poemName, env);
       return new Response(poemContent, {
         headers: { "content-type": "text/html; charset=utf-8" },
       });
@@ -20,9 +23,9 @@ export default {
 };
 
 // Function to generate the full HTML page with navbar & sidebar
-async function getPageHtml(): Promise<string> {
+async function getPageHtml(request: Request, env: any): Promise<string> {
   const sidebarHtml = await getSidebar(); // Get sidebar with poem links
-  const poemsHtml = await getAllPoemsHtml(); // Fetch and display all poems
+  const poemsHtml = await getAllPoemsHtml(request, env);  // Fetch and display all poems
 
   return `
   <!DOCTYPE html>
@@ -63,31 +66,63 @@ async function getPageHtml(): Promise<string> {
 
 // Function to fetch list of poem files
 async function getPoemFiles(): Promise<string[]> {
-  return ["poem1.html", "poem2.html"];
+  return ["mall.html", "poem2.html"];
 }
 
 // Function to fetch the poem content
-async function getPoemContent(poemName: string): Promise<string> {
-  const poemUrl = `https://raw.githubusercontent.com/robords/me/main/src/content/${poemName}`;
+// Simplified function to fetch the poem content using ASSETS with GitHub fallback
+async function getPoemContent(poemName: string, env: any): Promise<string> {
+  if (!env.ASSETS) {
+    console.error("ASSETS binding is undefined");
+    return tryGitHubFallback(poemName);
+  }
 
   try {
-    const response = await fetch(poemUrl);
-    if (!response.ok) return "Poem not found.";
-    const htmlContent = await response.text();
-    console.log(htmlContent);  // Debug the fetched content
-    return htmlContent;
+    // Use a consistent path format
+    const path = `src/content/${poemName}`;
+    console.log(`Trying to fetch ${path} from ASSETS`);
+    
+    const assetResponse = await env.ASSETS.fetch(new Request(path));
+    
+    if (assetResponse && assetResponse.ok) {
+      console.log(`Successfully fetched ${path} from ASSETS`);
+      return await assetResponse.text();
+    } else {
+      console.error(`Failed to fetch ${path} from ASSETS: ${assetResponse ? assetResponse.status : 'unknown'}`);
+      return tryGitHubFallback(poemName);
+    }
   } catch (error) {
-    console.error("Error fetching poem:", error);  // Debug error
-    return "Failed to fetch poem.";
+    console.error(`ASSETS fetch error:`, error);
+    return tryGitHubFallback(poemName);
   }
 }
 
-async function getAllPoemsHtml(): Promise<string> {
+
+// Helper function for GitHub fallback
+async function tryGitHubFallback(poemName: string): Promise<string> {
+  try {
+    const poemUrl = `https://raw.githubusercontent.com/robords/me/main/src/content/${poemName}`;
+    console.log(`Fallback: Fetching from GitHub: ${poemUrl}`);
+    const response = await fetch(poemUrl);
+    if (response.ok) {
+      console.log(`Successfully fetched ${poemName} from GitHub (fallback)`);
+      return await response.text();
+    } else {
+      console.log(`GitHub fallback fetch failed with status: ${response.status}`);
+      return getPlaceholderContent(poemName);
+    }
+  } catch (error) {
+    console.error(`GitHub fallback fetch error:`, error);
+    return getPlaceholderContent(poemName);
+  }
+}
+
+async function getAllPoemsHtml(request: Request, env: any): Promise<string> {
   const poemFiles = await getPoemFiles();
 
   let poemsHtmlArray = await Promise.all(
     poemFiles.map(async (filename) => {
-      const poemContent = await getPoemContent(filename);
+      const poemContent = await getPoemContent(filename, env);
       const poemId = filename.replace(".html", ""); // Unique ID for scrolling
 
       return `
@@ -101,6 +136,13 @@ async function getAllPoemsHtml(): Promise<string> {
   return poemsHtmlArray.join(""); // Combine all sections into one HTML string
 }
 
+function getPlaceholderContent(poemName: string): string {
+  return `<div class="poem-content">
+    <p>This is a placeholder for "${poemName}"</p>
+    <p>The poem content couldn't be retrieved at this time.</p>
+    <p>Please check back later.</p>
+  </div>`;
+}
 
 // Function to return the Navbar HTML
 function getNavbar(): string {
